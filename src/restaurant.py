@@ -1,23 +1,50 @@
-# TODO: Define `MenuItem` dataclass (will be moved to menu_item.py if separated):
-# - Fields: id (str), name (str), category (str), price (float), available (bool)
-# - Provide `to_dict()` and `from_dict()` helpers for JSON serialization
+import menu_item
 
-# TODO: Implement `Restaurant` class:
+
+
+class Restaurant: 
+    # TODO: Implement `Restaurant` class:
 # - Manage in-memory collection of MenuItem objects
 # - Load from and save to `data/restaurant_data.json`
 # - CRUD operations: view_all, find_by_id, find_by_name, find_by_category,
 #   add_item, update_item, delete_item
 # - Enforce validation via utils (unique id, proper types/ranges)
+    def view_all():
+        return None
 
+    def find_by_id():
+        return None
+    
+    def find_by_name():
+        return None
+    
+    def find_by_category():
+        return None
+
+    def add_item():
+        return None
+
+    def update_item():
+        return None
+
+    def delete_item():
+        return None
 # TODO: Sorting utilities inside Restaurant:
 # - sort_by_name(order="asc"|"desc")
 # - sort_by_price(order="asc"|"desc")
 # - sort_by_availability(available_first=True)
+    def sort_by_name(bool AscOrDesc):
+        return None
+    
+
 
 # TODO: Export functions:
 # - export_to_csv(items, fields, path)
 # - export_to_txt(items, fields, path)
 # - Accept subsets (e.g., search results) and allow field selection
+    def export_to_csv(items, fields, path):
+        return None
+    def export_to_txt(items,fields,path):
 
 # TODO: Undo/History (optional):
 # - Keep a stack of actions (add/update/delete) with before/after snapshots
