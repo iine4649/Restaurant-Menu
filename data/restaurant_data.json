@@ -1,0 +1,48 @@
+{
+    "name": "Kev's Kurry",
+    "location": "45 River St, Springfield",
+    "cuisine": "Thai",
+    "menu": [
+        {
+            "category": "Appetizer",
+            "id": 1,
+            "items": [
+                {"id": 1, "name": "Spring Rolls", "price": 5.99, "in_stock": true},
+                {"id": 2, "name": "Chicken Satay", "price": 7.49, "in_stock": true},
+                {"id": 3, "name": "Fried Tofu", "price": 6.49, "in_stock": true},
+                {"id": 4, "name": "Shrimp Tempura", "price": 8.99, "in_stock": true},
+                {"id": 5, "name": "Papaya Salad", "price": 7.99, "in_stock": true},
+                {"id": 6, "name": "Crispy Wontons", "price": 6.99, "in_stock": true},
+                {"id": 7, "name": "Tom Yum Soup (Cup)", "price": 5.49, "in_stock": true},
+                {"id": 8, "name": "Edamame (Spicy)", "price": 6.49, "in_stock": false}
+            ]
+        },
+        {
+            "category": "Entree",
+            "id": 2,
+            "items": [
+                {"id": 9, "name": "Pad Thai", "price": 13.99, "in_stock": true},
+                {"id": 10, "name": "Drunken Noodles", "price": 14.49, "in_stock": true},
+                {"id": 11, "name": "Green Curry", "price": 15.49, "in_stock": true},
+                {"id": 12, "name": "Red Curry", "price": 15.49, "in_stock": true},
+                {"id": 13, "name": "Massaman Curry", "price": 16.99, "in_stock": true},
+                {"id": 14, "name": "Panang Curry", "price": 15.99, "in_stock": true},
+                {"id": 15, "name": "Thai Fried Rice", "price": 12.99, "in_stock": true},
+                {"id": 16, "name": "Basil Chicken (Pad Kra Pao)", "price": 14.99, "in_stock": true},
+                {"id": 17, "name": "Cashew Nut Chicken", "price": 15.49, "in_stock": true},
+                {"id": 18, "name": "Grilled Lemongrass Salmon", "price": 18.99, "in_stock": false},
+                {"id": 19, "name": "Pad See Ew", "price": 14.45, "in_stock": true}
+            ]
+        },
+        {
+            "category": "Dessert",
+            "id": 3,
+            "items": [
+                {"id": 20, "name": "Mango Sticky Rice", "price": 7.99, "in_stock": true},
+                {"id": 21, "name": "Fried Banana with Honey", "price": 6.49, "in_stock": true},
+                {"id": 22, "name": "Thai Coconut Ice Cream", "price": 5.99, "in_stock": true},
+                {"id": 23, "name": "Pumpkin Custard", "price": 6.99, "in_stock": false}
+            ]
+        }
+    ]
+}

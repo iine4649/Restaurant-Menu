@@ -31,12 +31,11 @@ class MenuItem:
         )
 
 
-# Minimal helper to construct item dicts directly, if a class instance is not desired.
-def make_item_dict(item_id: int, name: str, price: float, in_stock: bool = True) -> Dict[str, Any]:
-    """Return a dict compatible with entries in data/restaurant_data.json -> menu[*].items[*]."""
-    return {
+    def make_item_dict(item_id: int, name: str, price: float, in_stock: bool = True) -> Dict[str, Any]:
+        """Return a dict compatible with entries in data/restaurant_data.json -> menu[*].items[*]."""
+        return {
         "id": int(item_id),
         "name": str(name),
         "price": float(price),
         "in_stock": bool(in_stock),
-    }
+        }
