@@ -1,3 +1,4 @@
+
 import json
 import csv
 import random
@@ -13,47 +14,112 @@ class Restaurant:
     def view_all(self):
         return None
 
-    def find_by_id(self):
+    def find_by_id(self, item_id):
+        # Assumes self.menu_items is a list of MenuItem objects
+        for item in getattr(self, 'menu_items', []):
+            if hasattr(item, 'id') and item.id == item_id:
+                return item
         return None
     
-    def find_by_name(self):
-        return None
+    def find_by_name(self, name):
+       for item in getattr(self, 'menu_items', []):
+            if hasattr(item, 'name') and name.lower() in item.name.lower():
+                return item
+       return None
     
-    def find_by_category(self):
-        return None
+    def find_by_category(self, category):
+        # Assumes self.menu_items is a list of MenuItem objects
+        results = []
+        for item in getattr(self, 'menu_items', []):
+            if hasattr(item, 'category') and category.lower() in item.category.lower():
+                results.append(item)
+        return results
 
     def add_item(self):
-    
+        # Prompt user for new item details and add to menu_items
+        item_id = input("Enter new item ID: ").strip()
+        name = input("Enter item name: ").strip()
+        category = input("Enter item category: ").strip()
+        # Import MenuItem if not already imported
         try:
-            name = self.name_entry.get().strip()
-            
-            if not name:
-                messagebox.showerror("Error", "Please enter the name of food")
+            from menu_item import MenuItem
+        except ImportError:
+            print("MenuItem class not found.")
+            return
+        if not hasattr(self, 'menu_items'):
+            self.menu_items = []
+        # Check for unique id
+        for item in self.menu_items:
+            if hasattr(item, 'id') and item.id == item_id:
+                print("ID already exists.")
                 return
-            
-            
-            # User Info
-            user_info = {
-                "name": name,
+        new_item = MenuItem(id=item_id, name=name, category=category)
+        self.menu_items.append(new_item)
+        print("Item added.")
+    
+        
+    def update_item(self):
+        changing_item = input("How do you want to choose your item? id or name ").strip()
+        if changing_item.lower() == 'id':
+            item_id = input("Enter the ID of the item to update: ").strip()
+            item = self.find_by_id(item_id)
+        elif changing_item.lower() == 'name':
+            name = input("Enter the name of the item to update: ").strip()
+            item = self.find_by_name(name)
+        else:
+            print("Invalid choice.")
+            return
+        if not item:
+            print("Item not found.")
+            return
+        print("What do you want to update? (id, name, category)")
+        field = input("Field to update: ").strip().lower()
+        if field == 'id':
+            new_id = input("Enter new ID: ").strip()
+            item.id = new_id
+        elif field == 'name':
+            new_name = input("Enter new name: ").strip()
+            item.name = new_name
+        elif field == 'category':
+            new_category = input("Enter new category: ").strip()
+            item.category = new_category
+        else:
+            print("Invalid field.")
+            return
+        print("Item updated.") 
 
-            }
-            
-            
-            # Save data
-            self.user_data[name] = user_info
-            self.save_user_data()
-            
-            # Display results
-            self.display_results(user_info)
-            
-        except Exception as e:
-            messagebox.showerror("Error", f"An error occurred: {e}")
-
-    def update_item():
-        return None
-
-    def delete_item():
-        return None
+    def delete_item(self):
+        deleting_item = input("How do you want to choose your item? id or name ").strip()
+        if deleting_item.lower() == 'id':
+            item_id = input("Enter the ID of the item to delete: ").strip()
+            item = self.find_by_id(item_id)
+            ays = input(f"Are you sure you want to delete {item.name}? (y/n) ").strip().lower()
+            if ays == 'y':
+                del item
+            elif ays == 'n':
+                print("Deletion cancelled.")
+                return
+            else:
+                print("Invalid choice.")
+                return
+        elif deleting_item.lower() == 'name':
+            name = input("Enter the name of the item to delete: ").strip()
+            item = self.find_by_name(name)
+            ays = input(f"Are you sure you want to delete {item.name}? (y/n) ").strip().lower()
+            if ays == 'y':
+                del item
+            elif ays == 'n':
+                print("Deletion cancelled.")
+                return
+            else:
+                print("Invalid choice.")
+                return
+        else:
+            print("Invalid choice.")
+            return
+        if not item:
+            print("Item not found.")
+            return
 # TODO: Sorting utilities inside Restaurant:
 # - sort_by_name(order="asc"|"desc")
 # - sort_by_price(order="asc"|"desc")
@@ -82,5 +148,3 @@ class Restaurant:
 # TODO: Error handling strategy:
 # - Raise clear custom exceptions or return error objects for invalid operations
 # - Never silently fail; surface messages for UI layer
-
-
