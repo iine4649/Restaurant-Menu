@@ -75,7 +75,7 @@ def load_json(path):
         return {}
 # - save_json(path, data) -> None with atomic write (tmp file + replace)
 def save_json(path, data):
-    """Save data to Json"""
+    """Saves data to Json"""
     try:
         if os.path.exists(path):
             with open(path, 'w', encoding='utf-8') as f:
