@@ -104,6 +104,22 @@ def export_to_csv(items, fields, path):
         print(f"Failed to export CSV file: {e}")
 
 # - export_to_txt(items, fields, path)
+def export_to_txt(items,fields,path):
+    try:
+        with open(path, 'w', newline='',encoding='utf-8') as txt:
+            writer = txt.DicWriter(txt,fieldnames=fields)
+            writer.writeheader()
+            for item in items:
+                if hasattr(item,'to_dict'):
+                    row = item.to_dict()
+                else: 
+                    row = dict(item)
+                filtered_row = {field: row.get(field, "") for field in fields}
+                writer.writerow(filtered_row)
+        print(f"Successfully exported txt file: {path}")
+
+    except Exception as e:
+        print(f"Failed to export txt file: {e}")
 
 # TODO: Search helpers (optional):
 # - normalize(text) to support partial/case-insensitive matching
@@ -111,8 +127,25 @@ def normalize(text) -> str:
     return text.title()
 
 # - matches_partial(haystack, needle) -> bool
+def matches_partial(haystack, needle) -> bool:
+    if haystack in needle:
+        return True
+    else:
+        return False
 
 # TODO: Logging helper (optional):
 # - append_action_log(path, action, before, after, timestamp)
+def append_action_log(path, action, before, after, timestamp):
+    try:
+        with open(path, "a", encoding="utf-8") as f:
+            log_entry = {
+                "timestamp": timestamp,
+                "action": action,
+                "before": before,
+                "after": after
+            }
+            f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
+    except Exception as e:
+        print(f"Failed to make action log: {e}")
 
 

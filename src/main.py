@@ -143,7 +143,7 @@ def cli_main_menu():
             try:
                 # This assumes Restaurant has a method to get current data
                 data = rest.get_data()
-                save_restaurant_data(data)
+                utils.save_json(path,data)
             except Exception as e:
                 print(f"Failed to save: {e}")
         elif choice == "7":
@@ -184,7 +184,7 @@ def cli_main_menu():
             if confirm == "y":
                 try:
                     data = rest.get_data()
-                    save_restaurant_data(data)
+                    utils.save_json(path,data)
                 except Exception as e:
                     print(f"Failed to save: {e}")
             print("Goodbye!")
@@ -197,10 +197,19 @@ def cli_main_menu():
 # - Validate input; re-prompt gracefully for invalid menu selections
 # - Keep the UI consistent and clear
 def main():
-    """Main function"""
-    root = tk.Tk()
-    app = restaurant(root)
-    root.mainloop()
+    while True:
+        print("1. Boot on CLI")
+        print("0. Exit")
+        choice = input("Select Boot Option").strip()
+        if choice == "1":
+            cli_main_menu()
+        elif choice == "0":
+            print("Exiting the application...")
+            break
+        else:
+            print("Invalid Selection")
+
+
 
 # TODO: Add `if __name__ == "__main__":` guard and call `main()` once implemented
 if __name__ == "__main__":
@@ -222,9 +231,6 @@ if __name__ == "__main__":
 # - Validate non-empty strings for name/category
 # - Gracefully handle not-found cases with warnings
 
-# TODO: Export features:
-# - Allow exporting current/filtered/sorted/search results to CSV or TXT
-# - Let user choose which fields to export and output path
 
 # TODO: Formatting and UX helpers:
 # - Use table formatting (from utils) for listing items
