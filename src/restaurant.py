@@ -1,5 +1,6 @@
-import menu_item
-
+import json
+import csv
+import random
 
 
 class Restaurant: 
@@ -9,20 +10,44 @@ class Restaurant:
 # - CRUD operations: view_all, find_by_id, find_by_name, find_by_category,
 #   add_item, update_item, delete_item
 # - Enforce validation via utils (unique id, proper types/ranges)
-    def view_all():
+    def view_all(self):
         return None
 
-    def find_by_id():
+    def find_by_id(self):
         return None
     
-    def find_by_name():
+    def find_by_name(self):
         return None
     
-    def find_by_category():
+    def find_by_category(self):
         return None
 
-    def add_item():
-        return None
+    def add_item(self):
+    
+        try:
+            name = self.name_entry.get().strip()
+            
+            if not name:
+                messagebox.showerror("Error", "Please enter the name of food")
+                return
+            
+            
+            # User Info
+            user_info = {
+                "name": name,
+
+            }
+            
+            
+            # Save data
+            self.user_data[name] = user_info
+            self.save_user_data()
+            
+            # Display results
+            self.display_results(user_info)
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred: {e}")
 
     def update_item():
         return None
