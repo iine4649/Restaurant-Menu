@@ -1,8 +1,8 @@
 import restaurant
 import utils
 import menu_item
-import tkinter as tk
-from tkinter import ttk, messagebox
+import sys
+from PySide6.QtWidgets import QApplication, QWidget, QMainWindow, QMessageBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QPushButton, QLineEdit, QLabel, QHBoxLayout, QComboBox, QFileDialog, QListWidget, QInputDialog, QTextEdit
 import json
 import datetime
 import os
@@ -10,103 +10,41 @@ import time
 
 
 
-# --- Tkinter GUI Entry Point ---
-def gui_main_menu():
-    rest = restaurant.Restaurant()
-    root = tk.Tk()
-    root.title("Restaurant Menu")
+# --- Tkinter GUI Entry Point --
 
-    def refresh_table():
-        for row in tree.get_children():
-            tree.delete(row)
-        items = rest.view_all()
-        if items:
-            for item in items:
-                tree.insert("", "end", values=(getattr(item, 'id', ''), getattr(item, 'name', ''), getattr(item, 'category', ''), getattr(item, 'price', ''), getattr(item, 'in_stock', '')))
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Restaurant Menu Manager")
+        container = QWidget()  
+        self.setCentralWidget(container)
+        layout = QVBoxLayout()
+        container.setLayout(layout)
 
-    def add_item():
-        try:
-            item_id = entry_id.get().strip()
-            name = entry_name.get().strip()
-            category = entry_category.get().strip()
-            price = entry_price.get().strip()
-            in_stock = var_in_stock.get()
-            item = menu_item.MenuItem(
-                id=item_id,
-                name=name,
-                category=category,
-                price=float(price),
-                in_stock=in_stock
-            )
-            rest.add_item(item)
-            refresh_table()
-            messagebox.showinfo("Success", "Item added.")
-        except Exception as e:
-            messagebox.showerror("Error", str(e))
+    # Horizontal layout for buttons
+        btn_layout = QHBoxLayout()
+        layout.addLayout(btn_layout)
 
-    def delete_item():
-        selected = tree.selection()
-        if not selected:
-            messagebox.showwarning("Warning", "No item selected.")
-            return
-        item_id = tree.item(selected[0])['values'][0]
-        try:
-            rest.delete_item(item_id)
-            refresh_table()
-            messagebox.showinfo("Success", "Item deleted.")
-        except Exception as e:
-            messagebox.showerror("Error", str(e))
+        btn_show_menu = QPushButton("Show Menu")
+        btn_show_menu.setFixedSize(120, 40)
+        btn_layout.addWidget(btn_show_menu)
+        btn_show_menu.clicked.connect(self.show_menu)
 
-    def update_item():
-        selected = tree.selection()
-        if not selected:
-            messagebox.showwarning("Warning", "No item selected.")
-            return
-        item_id = tree.item(selected[0])['values'][0]
-        name = entry_name.get().strip()
-        category = entry_category.get().strip()
-        price = entry_price.get().strip()
-        in_stock = var_in_stock.get()
-        try:
-            rest.update_item(id=item_id, name=name, category=category, price=float(price), in_stock=in_stock)
-            refresh_table()
-            messagebox.showinfo("Success", "Item updated.")
-        except Exception as e:
-            messagebox.showerror("Error", str(e))
+        btn_find_item = QPushButton("Find Item")
+        btn_find_item.setFixedSize(120, 40)
+        btn_layout.addWidget(btn_find_item)
+        btn_find_item.clicked.connect(self.find_item)
 
-    frame = ttk.Frame(root)
-    frame.pack(padx=10, pady=10)
+    def show_menu(self):
+        QMessageBox.information(self, "Menu", "Menu would be displayed here.")
 
-    ttk.Label(frame, text="ID:").grid(row=0, column=0)
-    entry_id = ttk.Entry(frame)
-    entry_id.grid(row=0, column=1)
-
-    ttk.Label(frame, text="Name:").grid(row=1, column=0)
-    entry_name = ttk.Entry(frame)
-    entry_name.grid(row=1, column=1)
-
-    ttk.Label(frame, text="Category:").grid(row=2, column=0)
-    entry_category = ttk.Entry(frame)
-    entry_category.grid(row=2, column=1)
-
-    ttk.Label(frame, text="Price:").grid(row=3, column=0)
-    entry_price = ttk.Entry(frame)
-    entry_price.grid(row=3, column=1)
-
-    var_in_stock = tk.BooleanVar()
-    ttk.Checkbutton(frame, text="In Stock", variable=var_in_stock).grid(row=4, column=1)
-
-    ttk.Button(frame, text="Add Item", command=add_item).grid(row=5, column=0)
-    ttk.Button(frame, text="Update Item", command=update_item).grid(row=5, column=1)
-    ttk.Button(frame, text="Delete Item", command=delete_item).grid(row=5, column=2)
-
-    tree = ttk.Treeview(root, columns=("ID", "Name", "Category", "Price", "In Stock"), show="headings")
-    for col in ("ID", "Name", "Category", "Price", "In Stock"):
-        tree.heading(col, text=col)
-    tree.pack(padx=10, pady=10, fill="both", expand=True)
-
-    refresh_table()
-    root.mainloop()
+    def find_item(self):
+        QMessageBox.information(self, "Find Item", "Item search functionality would be here.")
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())
 
 def cli_main_menu():
     """Main CLI menu loop."""
@@ -303,11 +241,7 @@ def main():
 
 
 
-# TODO: Add `if __name__ == "__main__":` guard and call `main()` once implemented
-if __name__ == "__main__":
-    main() 
-
-
+# TODO: Add `if __name__ == "__main__":` guard and call `main()` once implemente
 
 
 
@@ -315,9 +249,9 @@ if __name__ == "__main__":
 # - Search submenu: by ID, by Name (supports partial), by Category (supports partial)
 # - View submenu: View All, View by Category, View by Price Range
 # - Update submenu for a selected item: update name, category, price, availability
-# - Sort submenu: by Name (A–Z, Z–A), by Price (low→high, high→low), by Availability
+# - Sort submenu: b   y Name (A–Z, Z–A), by Price (low→high, high→low), by Availability
 
-# TODO: Integrate input validation helpers from `utils.py`:
+# TODO: Integrate idnput validation helpers from `utils.py`:
 # - Ensure unique IDs when adding new items
 # - Validate numeric fields (price >= 0 etc.)
 # - Validate non-empty strings for name/category
