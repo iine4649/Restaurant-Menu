@@ -12,7 +12,10 @@ class Restaurant:
 #   add_item, update_item, delete_item
 # - Enforce validation via utils (unique id, proper types/ranges)
     def view_all(self):
-        return None
+        if not hasattr(self, "items"):
+            self.items = []
+        return self.items
+
 
     def find_by_id(self, item_id):
         # Assumes self.menu_items is a list of MenuItem objects
