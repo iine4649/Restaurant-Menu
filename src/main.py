@@ -9,12 +9,104 @@ import os
 import time
 
 
-# TODO: Implement CLI entry-point for the Restaurant Menu application.
-# - Wire up `Restaurant` (from restaurant.py) and `MenuItem` (from menu_item.py) once created
-# - Load JSON data from `data/restaurant_data.json` at startup
-# - Persist changes back to JSON on-demand and on exit (confirm with user)
-# --- CLI Entry Points for Restaurant Menu Application ---
-path = "restaurant_data.json"
+
+# --- Tkinter GUI Entry Point ---
+def gui_main_menu():
+    rest = restaurant.Restaurant()
+    root = tk.Tk()
+    root.title("Restaurant Menu")
+
+    def refresh_table():
+        for row in tree.get_children():
+            tree.delete(row)
+        items = rest.view_all()
+        if items:
+            for item in items:
+                tree.insert("", "end", values=(getattr(item, 'id', ''), getattr(item, 'name', ''), getattr(item, 'category', ''), getattr(item, 'price', ''), getattr(item, 'in_stock', '')))
+
+    def add_item():
+        try:
+            item_id = entry_id.get().strip()
+            name = entry_name.get().strip()
+            category = entry_category.get().strip()
+            price = entry_price.get().strip()
+            in_stock = var_in_stock.get()
+            item = menu_item.MenuItem(
+                id=item_id,
+                name=name,
+                category=category,
+                price=float(price),
+                in_stock=in_stock
+            )
+            rest.add_item(item)
+            refresh_table()
+            messagebox.showinfo("Success", "Item added.")
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+
+    def delete_item():
+        selected = tree.selection()
+        if not selected:
+            messagebox.showwarning("Warning", "No item selected.")
+            return
+        item_id = tree.item(selected[0])['values'][0]
+        try:
+            rest.delete_item(item_id)
+            refresh_table()
+            messagebox.showinfo("Success", "Item deleted.")
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+
+    def update_item():
+        selected = tree.selection()
+        if not selected:
+            messagebox.showwarning("Warning", "No item selected.")
+            return
+        item_id = tree.item(selected[0])['values'][0]
+        name = entry_name.get().strip()
+        category = entry_category.get().strip()
+        price = entry_price.get().strip()
+        in_stock = var_in_stock.get()
+        try:
+            rest.update_item(id=item_id, name=name, category=category, price=float(price), in_stock=in_stock)
+            refresh_table()
+            messagebox.showinfo("Success", "Item updated.")
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+
+    frame = ttk.Frame(root)
+    frame.pack(padx=10, pady=10)
+
+    ttk.Label(frame, text="ID:").grid(row=0, column=0)
+    entry_id = ttk.Entry(frame)
+    entry_id.grid(row=0, column=1)
+
+    ttk.Label(frame, text="Name:").grid(row=1, column=0)
+    entry_name = ttk.Entry(frame)
+    entry_name.grid(row=1, column=1)
+
+    ttk.Label(frame, text="Category:").grid(row=2, column=0)
+    entry_category = ttk.Entry(frame)
+    entry_category.grid(row=2, column=1)
+
+    ttk.Label(frame, text="Price:").grid(row=3, column=0)
+    entry_price = ttk.Entry(frame)
+    entry_price.grid(row=3, column=1)
+
+    var_in_stock = tk.BooleanVar()
+    ttk.Checkbutton(frame, text="In Stock", variable=var_in_stock).grid(row=4, column=1)
+
+    ttk.Button(frame, text="Add Item", command=add_item).grid(row=5, column=0)
+    ttk.Button(frame, text="Update Item", command=update_item).grid(row=5, column=1)
+    ttk.Button(frame, text="Delete Item", command=delete_item).grid(row=5, column=2)
+
+    tree = ttk.Treeview(root, columns=("ID", "Name", "Category", "Price", "In Stock"), show="headings")
+    for col in ("ID", "Name", "Category", "Price", "In Stock"):
+        tree.heading(col, text=col)
+    tree.pack(padx=10, pady=10, fill="both", expand=True)
+
+    refresh_table()
+    root.mainloop()
 
 def cli_main_menu():
     """Main CLI menu loop."""
@@ -200,7 +292,7 @@ def main():
     while True:
         print("1. Boot on CLI")
         print("0. Exit")
-        choice = input("Select Boot Option").strip()
+        choice = input("Select Boot Option: ").strip()
         if choice == "1":
             cli_main_menu()
         elif choice == "0":

@@ -127,8 +127,8 @@ class Restaurant:
 # - sort_by_name(order="asc"|"desc")
 # - sort_by_price(order="asc"|"desc")
 # - sort_by_availability(available_first=True)
-    def sort_by_name(bool AscOrDesc):
-        return None
+#    def sort_by_name(bool AscOrDesc):
+ #       return None 
     
 
 
@@ -139,7 +139,7 @@ class Restaurant:
     def export_to_csv(items, fields, path):
         return None
     def export_to_txt(items,fields,path):
-
+        return None
 # TODO: Undo/History (optional):
 # - Keep a stack of actions (add/update/delete) with before/after snapshots
 # - Provide `undo_last_action()` that rolls back state safely
@@ -151,3 +151,4 @@ class Restaurant:
 # TODO: Error handling strategy:
 # - Raise clear custom exceptions or return error objects for invalid operations
 # - Never silently fail; surface messages for UI layer
+        
