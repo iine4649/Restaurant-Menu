@@ -1,20 +1,50 @@
 import restaurant
 import utils
 import menu_item
-import tkinter as tk
-from tkinter import ttk, messagebox
+import sys
+from PySide6.QtWidgets import QApplication, QWidget, QMainWindow, QMessageBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QPushButton, QLineEdit, QLabel, QHBoxLayout, QComboBox, QFileDialog, QListWidget, QInputDialog, QTextEdit
 import json
 import datetime
 import os
 import time
 
 
-# TODO: Implement CLI entry-point for the Restaurant Menu application.
-# - Wire up `Restaurant` (from restaurant.py) and `MenuItem` (from menu_item.py) once created
-# - Load JSON data from `data/restaurant_data.json` at startup
-# - Persist changes back to JSON on-demand and on exit (confirm with user)
-# --- CLI Entry Points for Restaurant Menu Application ---
-path = "restaurant_data.json"
+
+# --- Tkinter GUI Entry Point --
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Restaurant Menu Manager")
+        container = QWidget()  
+        self.setCentralWidget(container)
+        layout = QVBoxLayout()
+        container.setLayout(layout)
+
+    # Horizontal layout for buttons
+        btn_layout = QHBoxLayout()
+        layout.addLayout(btn_layout)
+
+        btn_show_menu = QPushButton("Show Menu")
+        btn_show_menu.setFixedSize(120, 40)
+        btn_layout.addWidget(btn_show_menu)
+        btn_show_menu.clicked.connect(self.show_menu)
+
+        btn_find_item = QPushButton("Find Item")
+        btn_find_item.setFixedSize(120, 40)
+        btn_layout.addWidget(btn_find_item)
+        btn_find_item.clicked.connect(self.find_item)
+
+    def show_menu(self):
+        QMessageBox.information(self, "Menu", "Menu would be displayed here.")
+
+    def find_item(self):
+        QMessageBox.information(self, "Find Item", "Item search functionality would be here.")
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())
 
 def cli_main_menu():
     """Main CLI menu loop."""
@@ -200,7 +230,7 @@ def main():
     while True:
         print("1. Boot on CLI")
         print("0. Exit")
-        choice = input("Select Boot Option").strip()
+        choice = input("Select Boot Option: ").strip()
         if choice == "1":
             cli_main_menu()
         elif choice == "0":
@@ -211,11 +241,7 @@ def main():
 
 
 
-# TODO: Add `if __name__ == "__main__":` guard and call `main()` once implemented
-if __name__ == "__main__":
-    main() 
-
-
+# TODO: Add `if __name__ == "__main__":` guard and call `main()` once implemente
 
 
 
@@ -223,9 +249,9 @@ if __name__ == "__main__":
 # - Search submenu: by ID, by Name (supports partial), by Category (supports partial)
 # - View submenu: View All, View by Category, View by Price Range
 # - Update submenu for a selected item: update name, category, price, availability
-# - Sort submenu: by Name (A–Z, Z–A), by Price (low→high, high→low), by Availability
+# - Sort submenu: b   y Name (A–Z, Z–A), by Price (low→high, high→low), by Availability
 
-# TODO: Integrate input validation helpers from `utils.py`:
+# TODO: Integrate idnput validation helpers from `utils.py`:
 # - Ensure unique IDs when adding new items
 # - Validate numeric fields (price >= 0 etc.)
 # - Validate non-empty strings for name/category

@@ -127,11 +127,4 @@ class Restaurant:
 # - sort_by_name(order="asc"|"desc")
 # - sort_by_price(order="asc"|"desc")
 # - sort_by_availability(available_first=True)
-    def sort_by_name(bool AscOrDesc):
-        return None
-        
-
-# TODO: Undo/History (optional):
-# - Keep a stack of actions (add/update/delete) with before/after snapshots
-# - Provide `undo_last_action()` that rolls back state safely
 
