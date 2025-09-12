@@ -10,8 +10,15 @@ import os
 import time
 
 
+# TODO: Implement CLI entry-point for the Restaurant Menu application.
+# - Wire up `Restaurant` (from restaurant.py) and `MenuItem` (from menu_item.py) once created
+# - Load JSON data from `data/restaurant_data.json` at startup
+# - Persist changes back to JSON on-demand and on exit (confirm with user)
+# --- CLI Entry Points for Restaurant Menu Application ---
+path = "restaurant_data.json"
 
 # --- Tkinter GUI Entry Point --
+
 
 
 class MainWindow(QMainWindow):
@@ -347,11 +354,14 @@ def main():
 
 
 
-# TODO: Implement Submenus / Nested flows:
+
+@@ -249,19 +24,17 @@ def main():
 # - Search submenu: by ID, by Name (supports partial), by Category (supports partial)
 # - View submenu: View All, View by Category, View by Price Range
 # - Update submenu for a selected item: update name, category, price, availability
 # - Sort submenu: b   y Name (A–Z, Z–A), by Price (low→high, high→low), by Availability
+# - Sort submenu: by Name (A–Z, Z–A), by Price (low→high, high→low), by Availability
+
 
 # TODO: Integrate idnput validation helpers from `utils.py`:
 # - Ensure unique IDs when adding new items
@@ -364,11 +374,9 @@ def main():
 # - Use table formatting (from utils) for listing items
 # - Show clear success/error messages
 
+
+
 # TODO: Optional enhancements:
 # - Action logging (add/update/delete) to a log file
 # - Show simple statistics (e.g., average price by category)
-# - Implement undo of last action (delegates to Restaurant)
-
-
-
 
