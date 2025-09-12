@@ -134,9 +134,9 @@ class Restaurant:
             print(f"Error: {e}")
 # - sort_by_price(order="asc"|"desc")
     def sort_by_price(self, order="asc"):
-        reverse = true if order == "desc" else False
+        reverse = True if order == "desc" else False
         try: 
-            self.menu_items.sort(key=lambda, item: item.price.lower(), reverse=reverse)
+            self.menu_items.sort(key=lambda item: item.price.lower(), reverse=reverse)
         except Exception as e:
             print(f"Error: {e}")
 # - sort_by_availability(available_first=True)

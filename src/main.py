@@ -16,7 +16,7 @@ import time
 # --- CLI Entry Points for Restaurant Menu Application ---
 path = "restaurant_data.json"
 
-# --- Tkinter GUI Entry Point --
+
 
  
 
@@ -253,8 +253,6 @@ def main():
 
 
 
-
-@@ -249,19 +24,17 @@ def main():
 # - Search submenu: by ID, by Name (supports partial), by Category (supports partial)
 # - View submenu: View All, View by Category, View by Price Range
 # - Update submenu for a selected item: update name, category, price, availability
