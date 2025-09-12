@@ -125,6 +125,26 @@ class Restaurant:
             return
 # TODO: Sorting utilities inside Restaurant:
 # - sort_by_name(order="asc"|"desc")
+    def sort_by_name(self, order="asc"):
+        reverse = True if order == "desc" else False
+        try:
+            self.menu_items.sort(key=lambda item: item.name.lower(), reverse=reverse)
+            print(f"Sorted Menu {'Reversed' if reverse else 'Ascended'}")
+        except Exception as e:
+            print(f"Error: {e}")
 # - sort_by_price(order="asc"|"desc")
+    def sort_by_price(self, order="asc"):
+        reverse = true if order == "desc" else False
+        try: 
+            self.menu_items.sort(key=lambda, item: item.price.lower(), reverse=reverse)
+        except Exception as e:
+            print(f"Error: {e}")
 # - sort_by_availability(available_first=True)
+    def sort_by_availability(self,available_first = True):
+        self.item.in_stock
+        
+
+# TODO: Undo/History (optional):
+# - Keep a stack of actions (add/update/delete) with before/after snapshots
+# - Provide `undo_last_action()` that rolls back state safely
 
