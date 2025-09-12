@@ -1,6 +1,8 @@
 import json
 import os
 import csv
+import tempfile
+
 path = "restaurant_data.json"
 # TODO: Input validation helpers:
 # - validate_unique_id(existing_ids, new_id) -> bool / raise ValueError
@@ -73,16 +75,20 @@ def load_json(path):
     except Exception as e:
         print(f"Data loading error: {e}")
         return {}
+        
 # - save_json(path, data) -> None with atomic write (tmp file + replace)
 def save_json(path, data):
-    """Saves data to Json"""
     try:
-        if os.path.exists(path):
-            with open(path, 'w', encoding='utf-8') as f:
-                json.dump(path, f, ensure_ascii=False, indent=2)
+        dir_name = os.path.dirname(path) or "."
+        with tempfile.NamedTemporaryFile("w", dir=dir_name, delete=False, encoding="utf-8") as tmpfile:
+            json.dump(data, tmpfile, ensure_ascii=False, indent=2)
+            tmpfile.flush()
+            os.fsync(tmpfile.fileno())
+            tempname = tmpfile.name
+        os.replace(tempname, path)
     except Exception as e:
         print(f"Data saving error: {e}")
-        return {}
+
 
 # TODO: Export helpers:
 # - export_to_csv(items, fields, path)
