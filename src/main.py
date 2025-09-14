@@ -23,25 +23,61 @@ path = "restaurant_data.json"
 
 class MainWindow(QMainWindow):
 
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Restaurant Menu Manager")
-        container = QWidget()
-        self.setCentralWidget(container)
-        layout = QVBoxLayout()
-        container.setLayout(layout)
+    def show_menu(self):
+        # Remove all widgets from the central widget
+        container = self.centralWidget()
+        for i in reversed(range(container.layout().count())):
+            item = container.layout().itemAt(i)
+            widget = item.widget()
+            if widget:
+                widget.setParent(None)
+            else:
+                container.layout().removeItem(item)
 
-        # Add welcome label at the top
+        # Add 'Return' button at the top
+        btn_return = QPushButton("Return")
+        btn_return.setFixedSize(120, 40)
+        container.layout().addWidget(btn_return)
+        btn_return.clicked.connect(self.restore_main_buttons)
+
+        # Load menu items from JSON
+        try:
+            with open("restaurant_data.json", "r") as f:
+                data = json.load(f)
+        except Exception:
+            data = []
+        # Create table
+        table = QTableWidget()
+        table.setColumnCount(4)
+        table.setHorizontalHeaderLabels(["ID", "Name", "Category", "Price"])
+        table.setRowCount(len(data))
+        for row, item in enumerate(data):
+            table.setItem(row, 0, QTableWidgetItem(str(item.get("id", ""))))
+            table.setItem(row, 1, QTableWidgetItem(str(item.get("name", ""))))
+            table.setItem(row, 2, QTableWidgetItem(str(item.get("category", ""))))
+            table.setItem(row, 3, QTableWidgetItem(str(item.get("price", ""))))
+        container.layout().addWidget(table)
+
+    def restore_main_buttons(self):
+        # Remove all widgets from the central widget
+        container = self.centralWidget()
+        for i in reversed(range(container.layout().count())):
+            item = container.layout().itemAt(i)
+            widget = item.widget()
+            if widget:
+                widget.setParent(None)
+            else:
+                container.layout().removeItem(item)
+
+        # Re-add welcome label
         welcome_label = QLabel("Welcome to Ethan and Shun's restaurant!")
         welcome_label.setAlignment(Qt.AlignHCenter)
-        layout.addWidget(welcome_label)
+        container.layout().addWidget(welcome_label)
 
-        # Horizontal layout for buttons, centered below the label
+        # Re-add main buttons
         btn_layout = QHBoxLayout()
         btn_layout.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
-        layout.addLayout(btn_layout)
-
-        # Add all buttons to the same horizontal layout, aligned top center
+        container.layout().addLayout(btn_layout)
         buttons = [
             ("Show Menu", self.show_menu),
             ("Find Item", self.find_item),
@@ -49,8 +85,11 @@ class MainWindow(QMainWindow):
             ("Delete Item", self.delete_item),
             ("Update Item", self.update_item)
         ]
-
         for text, slot in buttons:
+            btn = QPushButton(text)
+            btn.setFixedSize(120, 40)
+            btn_layout.addWidget(btn)
+            btn.clicked.connect(slot)
             btn = QPushButton(text)
             btn.setFixedSize(120, 40)
             btn_layout.addWidget(btn)
