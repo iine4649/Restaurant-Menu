@@ -59,6 +59,9 @@ class MainWindow(QMainWindow):
         self.restaurant = restaurant.Restaurant()
 
     def show_menu(self):
+        # [Collaborator Note] Displays all menu items in a table view.
+        # Clears the main window and adds a 'Return to Home' button at the top.
+        # Loads menu items from the Restaurant instance and populates the table.
         # Remove all widgets from the central widget
         container = self.centralWidget()
         for i in reversed(range(container.layout().count())):
@@ -89,6 +92,9 @@ class MainWindow(QMainWindow):
         container.layout().addWidget(table)
 
     def find_item(self):
+        # [Collaborator Note] Prompts the user to search for a menu item by ID, name, or category.
+        # Uses Restaurant's find_by_id, find_by_name, and find_by_category methods.
+        # Displays the result(s) in a message box.
         # Prompt for search type
         search_type, ok = QInputDialog.getItem(self, "Find Item", "Search by:", ["ID", "Name", "Category"], 0, False)
         if not ok:
@@ -124,6 +130,9 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Result", f"Found item:\nID: {result.id}\nName: {result.name}\nCategory: {result.category}\nPrice: ${result.price}\nIn Stock: {'Yes' if result.in_stock else 'No'}")
 
     def add_item(self):
+        # [Collaborator Note] Prompts the user for new item details (ID, name, category, price).
+        # Creates a new MenuItem and adds it to the Restaurant instance.
+        # Shows a success or error message.
         # Prompt for new item details
         item_id, ok_id = QInputDialog.getText(self, "Add Item", "Enter new item ID:")
         if not ok_id or not item_id:
@@ -149,6 +158,8 @@ class MainWindow(QMainWindow):
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Failed to add item: {e}")
     def delete_item(self):
+        # [Collaborator Note] Prompts the user for an item ID to delete.
+        # Calls Restaurant's delete_item method and shows a success or error message.
         item_id, ok = QInputDialog.getText(self, "Delete Item", "Enter item ID to delete:")
         if not ok or not item_id:
             return
@@ -160,6 +171,9 @@ class MainWindow(QMainWindow):
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Failed to delete item: {e}")
     def update_item(self):
+        # [Collaborator Note] Prompts the user for an item ID and new values for name, category, and price.
+        # Calls Restaurant's update_item method to update the item.
+        # Shows a success or error message.
         item_id, ok_id = QInputDialog.getText(self, "Update Item", "Enter item ID to update:")
         if not ok_id or not item_id:
             return
@@ -304,9 +318,7 @@ def cli_main_menu():
                 print(f"Failed to delete item: {e}")
         elif choice == "6":
             # Save changes
-            # You may need to get data from Restaurant instance
             try:
-                # This assumes Restaurant has a method to get current data
                 data = rest.get_data()
                 utils.save_json(path,data)
             except Exception as e:
