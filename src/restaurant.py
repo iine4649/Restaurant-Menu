@@ -11,10 +11,36 @@ class Restaurant:
 # - CRUD operations: view_all, find_by_id, find_by_name, find_by_category,
 #   add_item, update_item, delete_item
 # - Enforce validation via utils (unique id, proper types/ranges)
+    
+    def __init__(self):
+        self.menu_items = []
+        self.load_data()
+    
+    def load_data(self):
+        """Load menu items from JSON file"""
+        try:
+            import utils
+            data = utils.load_json("data/restaurant_data.json")
+            
+            if data and isinstance(data, dict) and "menu" in data:
+                from menu_item import MenuItem
+                self.menu_items = []
+                for category in data["menu"]:
+                    if "items" in category:
+                        for item in category["items"]:
+                            # Add category information to the item
+                            item["category"] = category["category"]
+                            self.menu_items.append(MenuItem.from_dict(item))
+                print(f"Loaded {len(self.menu_items)} menu items")
+            else:
+                print("No valid data found in JSON file")
+                self.menu_items = []
+        except Exception as e:
+            print(f"Error loading data: {e}")
+            self.menu_items = []
+    
     def view_all(self):
-        if not hasattr(self, "items"):
-            self.items = []
-        return self.items
+        return self.menu_items
 
 
     def find_by_id(self, item_id):
@@ -25,10 +51,11 @@ class Restaurant:
         return None
     
     def find_by_name(self, name):
-       for item in getattr(self, 'menu_items', []):
+        results = []
+        for item in getattr(self, 'menu_items', []):
             if hasattr(item, 'name') and name.lower() in item.name.lower():
-                return item
-       return None
+                results.append(item)
+        return results
     
     def find_by_category(self, category):
         # Assumes self.menu_items is a list of MenuItem objects
@@ -38,110 +65,110 @@ class Restaurant:
                 results.append(item)
         return results
 
-    def add_item(self):
-        # Prompt user for new item details and add to menu_items
-        item_id = input("Enter new item ID: ").strip()
-        name = input("Enter item name: ").strip()
-        category = input("Enter item category: ").strip()
-        # Import MenuItem if not already imported
-        try:
-            from menu_item import MenuItem
-        except ImportError:
-            print("MenuItem class not found.")
-            return
+    def add_item(self, item):
+        # Add a MenuItem object to the restaurant
         if not hasattr(self, 'menu_items'):
             self.menu_items = []
         # Check for unique id
-        for item in self.menu_items:
-            if hasattr(item, 'id') and item.id == item_id:
-                print("ID already exists.")
-                return
-        new_item = MenuItem(id=item_id, name=name, category=category)
-        self.menu_items.append(new_item)
+        for existing_item in self.menu_items:
+            if hasattr(existing_item, 'id') and existing_item.id == item.id:
+                raise ValueError(f"ID {item.id} already exists.")
+        self.menu_items.append(item)
         print("Item added.")
     
         
-    def update_item(self):
-        changing_item = input("How do you want to choose your item? id or name ").strip()
-        if changing_item.lower() == 'id':
-            item_id = input("Enter the ID of the item to update: ").strip()
-            item = self.find_by_id(item_id)
-        elif changing_item.lower() == 'name':
-            name = input("Enter the name of the item to update: ").strip()
-            item = self.find_by_name(name)
-        else:
-            print("Invalid choice.")
-            return
+    def update_item(self, item_id, name=None, category=None, price=None, in_stock=None):
+        # Update an existing item by ID
+        item = self.find_by_id(item_id)
         if not item:
-            print("Item not found.")
-            return
-        print("What do you want to update? (id, name, category)")
-        field = input("Field to update: ").strip().lower()
-        if field == 'id':
-            new_id = input("Enter new ID: ").strip()
-            item.id = new_id
-        elif field == 'name':
-            new_name = input("Enter new name: ").strip()
-            item.name = new_name
-        elif field == 'category':
-            new_category = input("Enter new category: ").strip()
-            item.category = new_category
-        else:
-            print("Invalid field.")
-            return
+            raise ValueError(f"Item with ID {item_id} not found.")
+        
+        if name is not None:
+            item.name = name
+        if category is not None:
+            item.category = category
+        if price is not None:
+            item.price = price
+        if in_stock is not None:
+            item.in_stock = in_stock
+        
         print("Item updated.") 
 
-    def delete_item(self):
-        deleting_item = input("How do you want to choose your item? id or name ").strip()
-        if deleting_item.lower() == 'id':
-            item_id = input("Enter the ID of the item to delete: ").strip()
-            item = self.find_by_id(item_id)
-            ays = input(f"Are you sure you want to delete {item.name}? (y/n) ").strip().lower()
-            if ays == 'y':
-                del item
-            elif ays == 'n':
-                print("Deletion cancelled.")
+    def delete_item(self, item_id):
+        # Delete an item by ID
+        if not hasattr(self, 'menu_items'):
+            self.menu_items = []
+        
+        for i, item in enumerate(self.menu_items):
+            if hasattr(item, 'id') and item.id == item_id:
+                del self.menu_items[i]
+                print(f"Item with ID {item_id} deleted.")
                 return
-            else:
-                print("Invalid choice.")
-                return
-        elif deleting_item.lower() == 'name':
-            name = input("Enter the name of the item to delete: ").strip()
-            item = self.find_by_name(name)
-            ays = input(f"Are you sure you want to delete {item.name}? (y/n) ").strip().lower()
-            if ays == 'y':
-                del item
-            elif ays == 'n':
-                print("Deletion cancelled.")
-                return
-            else:
-                print("Invalid choice.")
-                return
-        else:
-            print("Invalid choice.")
-            return
-        if not item:
-            print("Item not found.")
-            return
+        
+        raise ValueError(f"Item with ID {item_id} not found.")
 # TODO: Sorting utilities inside Restaurant:
 # - sort_by_name(order="asc"|"desc")
     def sort_by_name(self, order="asc"):
         reverse = True if order == "desc" else False
         try:
+            if not hasattr(self, 'menu_items'):
+                self.menu_items = []
             self.menu_items.sort(key=lambda item: item.name.lower(), reverse=reverse)
             print(f"Sorted Menu {'Reversed' if reverse else 'Ascended'}")
+            return self.menu_items
         except Exception as e:
             print(f"Error: {e}")
-# - sort_by_price(order="asc"|"desc")
+            return []
+    
     def sort_by_price(self, order="asc"):
-        reverse = true if order == "desc" else False
-        try: 
-            self.menu_items.sort(key=lambda, item: item.price.lower(), reverse=reverse)
+        reverse = True if order == "desc" else False
+        try:
+            if not hasattr(self, 'menu_items'):
+                self.menu_items = []
+            self.menu_items.sort(key=lambda item: getattr(item, 'price', 0), reverse=reverse)
+            return self.menu_items
         except Exception as e:
             print(f"Error: {e}")
-# - sort_by_availability(available_first=True)
-    def sort_by_availability(self,available_first = True):
-        self.item.in_stock
+            return []
+    
+    def sort_by_availability(self, available_first=True):
+        try:
+            if not hasattr(self, 'menu_items'):
+                self.menu_items = []
+            self.menu_items.sort(key=lambda item: not getattr(item, 'in_stock', False) if available_first else getattr(item, 'in_stock', False))
+            return self.menu_items
+        except Exception as e:
+            print(f"Error: {e}")
+            return []
+    
+    def get_data(self):
+        # Return data for saving to JSON in the original format
+        if not hasattr(self, 'menu_items'):
+            self.menu_items = []
+        
+        # Group items by category
+        categories = {}
+        for item in self.menu_items:
+            category = item.category
+            if category not in categories:
+                categories[category] = []
+            categories[category].append(item.to_dict())
+        
+        # Convert to the original JSON structure
+        menu = []
+        for i, (category_name, items) in enumerate(categories.items(), 1):
+            menu.append({
+                "category": category_name,
+                "id": i,
+                "items": items
+            })
+        
+        return {
+            "name": "Kev's Kurry",
+            "location": "45 River St, Springfield", 
+            "cuisine": "Thai",
+            "menu": menu
+        }
         
 
 # TODO: Undo/History (optional):

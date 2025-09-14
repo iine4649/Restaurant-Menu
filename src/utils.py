@@ -113,7 +113,7 @@ def export_to_csv(items, fields, path):
 def export_to_txt(items,fields,path):
     try:
         with open(path, 'w', newline='',encoding='utf-8') as txt:
-            writer = txt.DicWriter(txt,fieldnames=fields)
+            writer = csv.DictWriter(txt,fieldnames=fields)
             writer.writeheader()
             for item in items:
                 if hasattr(item,'to_dict'):
