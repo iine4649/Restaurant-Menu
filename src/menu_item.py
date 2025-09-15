@@ -9,6 +9,7 @@ class MenuItem:
     id: int
     name: str
     price: float
+    category: str = ""
     in_stock: bool = True
 
     def to_dict(self) -> Dict[str, Any]:
@@ -17,25 +18,28 @@ class MenuItem:
             "id": self.id,
             "name": self.name,
             "price": float(self.price),
+            "category": self.category,
             "in_stock": bool(self.in_stock),
         }
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "MenuItem":
-        """Create a MenuItem from a dict with keys id, name, price, in_stock."""
+        """Create a MenuItem from a dict with keys id, name, price, category, in_stock."""
         return cls(
             id=int(data["id"]),
             name=str(data["name"]),
             price=float(data["price"]),
+            category=str(data.get("category", "")),
             in_stock=bool(data.get("in_stock", True)),
         )
 
 
-    def make_item_dict(item_id: int, name: str, price: float, in_stock: bool = True) -> Dict[str, Any]:
+    def make_item_dict(item_id: int, name: str, price: float, category: str = "", in_stock: bool = True) -> Dict[str, Any]:
         """Return a dict compatible with entries in data/restaurant_data.json -> menu[*].items[*]."""
         return {
         "id": int(item_id),
         "name": str(name),
         "price": float(price),
+        "category": str(category),
         "in_stock": bool(in_stock),
         }

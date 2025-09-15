@@ -2,23 +2,39 @@ import json
 import os
 import csv
 import tempfile
+import sys
 
-path = "restaurant_data.json"
-# TODO: Input validation helpers:
-# - validate_unique_id(existing_ids, new_id) -> bool / raise ValueError
-def validate_unique_id(existing_ids, new_id):
-    if new_id in existing_ids:
-        raise ValueError(f"ID {new_id} exists already. Please assign different ID")
-    return True
+def get_resource_path(relative_path):
+    """Get absolute path to resource, works for dev and for PyInstaller"""
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    
+    return os.path.join(base_path, relative_path)
 
-# - validate_non_empty_string(value, field_name) -> str
+
+
+# Validate unique id
+def validate_unique_id(existing_items, new_id):
+    try:
+        # Extract IDs from menu items
+        existing_ids = [item.id for item in existing_items if hasattr(item, 'id')]
+        if new_id in existing_ids:
+            raise ValueError(f"ID {new_id} exists already. Please assign different ID")
+    except (TypeError, ValueError):
+        raise ValueError("Please enter ID in number")
+    return new_id
+
+# Validate non empty string
 def validate_non_empty_string(value, field_name) -> str:
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{field_name} cannot be empty")
     return value.strip()
 
+# Validate price
 
-# - validate_price(value) -> float (>= 0)
 def validate_price(value) -> float:
     try:
         price = float(value)
@@ -29,13 +45,12 @@ def validate_price(value) -> float:
     return price
 
 
-# TODO: Formatting helpers:
-# - format_items_table(items) -> str (render a simple table for CLI)
+# Format items table
 def format_items_table(items):
     if not items:
         return "Data does not exist"
 
-    # dict
+
     rows = []
     for item in items:
         if hasattr(item, 'to_dict'):
@@ -62,13 +77,14 @@ def format_items_table(items):
     return table
 
 
-# - format_menu_item(item) -> str (single-line summary)
 
-# TODO: Persistence helpers:
-# - load_json(path) -> dict/list with error handling
-def load_json(path):
+
+
+# Load data from json file
+def load_json(relative_path):
     """Load saved user data"""
     try:
+        path = get_resource_path(relative_path)
         if os.path.exists(path):
             with open(path, 'r', encoding='utf-8') as f:
                 return json.load(f)
@@ -76,22 +92,38 @@ def load_json(path):
         print(f"Data loading error: {e}")
         return {}
         
-# - save_json(path, data) -> None with atomic write (tmp file + replace)
-def save_json(path, data):
+# Save data to json file
+def save_json(relative_path, data):
+    """Save data to JSON file, handling both dev and PyInstaller environments"""
     try:
-        dir_name = os.path.dirname(path) or "."
+        # For PyInstaller, save to the same directory as the executable
+        if hasattr(sys, '_MEIPASS'):
+            # Running as PyInstaller bundle
+            exe_dir = os.path.dirname(sys.executable)
+            path = os.path.join(exe_dir, relative_path)
+        else:
+            # Running as script
+            path = get_resource_path(relative_path)
+        
+        # Ensure directory exists
+        dir_name = os.path.dirname(path)
+        if dir_name and not os.path.exists(dir_name):
+            os.makedirs(dir_name, exist_ok=True)
+        
         with tempfile.NamedTemporaryFile("w", dir=dir_name, delete=False, encoding="utf-8") as tmpfile:
             json.dump(data, tmpfile, ensure_ascii=False, indent=2)
             tmpfile.flush()
             os.fsync(tmpfile.fileno())
             tempname = tmpfile.name
         os.replace(tempname, path)
+        print(f"Data saved to: {path}")
     except Exception as e:
-        print(f"Data saving error: {e}")
+        print(f"Error saving data: {e}")
 
 
-# TODO: Export helpers:
-# - export_to_csv(items, fields, path)
+
+
+#TODO: export to csv use in main.py
 def export_to_csv(items, fields, path):
     try:
         with open(path, 'w', newline='', encoding='utf-8') as csvfile:
@@ -109,11 +141,11 @@ def export_to_csv(items, fields, path):
     except Exception as e:
         print(f"Failed to export CSV file: {e}")
 
-# - export_to_txt(items, fields, path)
+#TODO: export to txt use in main.py
 def export_to_txt(items,fields,path):
     try:
         with open(path, 'w', newline='',encoding='utf-8') as txt:
-            writer = txt.DicWriter(txt,fieldnames=fields)
+            writer = csv.DictWriter(txt,fieldnames=fields)
             writer.writeheader()
             for item in items:
                 if hasattr(item,'to_dict'):
@@ -127,20 +159,12 @@ def export_to_txt(items,fields,path):
     except Exception as e:
         print(f"Failed to export txt file: {e}")
 
-# TODO: Search helpers (optional):
-# - normalize(text) to support partial/case-insensitive matching
+
+#TODO: normalize use in main.py
 def normalize(text) -> str:
     return text.title()
 
-# - matches_partial(haystack, needle) -> bool
-def matches_partial(haystack, needle) -> bool:
-    if haystack in needle:
-        return True
-    else:
-        return False
-
-# TODO: Logging helper (optional):
-# - append_action_log(path, action, before, after, timestamp)
+#TODO: add log to a file
 def append_action_log(path, action, before, after, timestamp):
     try:
         with open(path, "a", encoding="utf-8") as f:
