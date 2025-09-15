@@ -8,16 +8,12 @@ import json
 import datetime
 import os
 import time
+        
+from menu_item import MenuItem
+
+path = "data/restaurant_data.json"
 
 
-# TODO: Implement CLI entry-point for the Restaurant Menu application.
-# - Wire up `Restaurant` (from restaurant.py) and `MenuItem` (from menu_item.py) once created
-# - Load JSON data from `data/restaurant_data.json` at startup
-# - Persist changes back to JSON on-demand and on exit (confirm with user)
-# --- CLI Entry Points for Restaurant Menu Application ---
-path = "restaurant_data.json"
-
-# --- Tkinter GUI Entry Point --
 
 
 
@@ -26,22 +22,23 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Restaurant Menu Manager")
+        self.restaurant = restaurant.Restaurant()
+        self.resize(1000, 700)
+        self.init_ui()
+
+    def init_ui(self):
         container = QWidget()
         self.setCentralWidget(container)
         layout = QVBoxLayout()
         container.setLayout(layout)
 
-        # Add welcome label at the top
         welcome_label = QLabel("Welcome to Ethan and Shun's restaurant!")
         welcome_label.setAlignment(Qt.AlignHCenter)
         layout.addWidget(welcome_label)
 
-        # Horizontal layout for buttons, centered below the label
         btn_layout = QHBoxLayout()
         btn_layout.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
         layout.addLayout(btn_layout)
-
-        # Add all buttons to the same horizontal layout, aligned top center
         buttons = [
             ("Show Menu", self.show_menu),
             ("Find Item", self.find_item),
@@ -55,11 +52,10 @@ class MainWindow(QMainWindow):
             btn.setFixedSize(120, 40)
             btn_layout.addWidget(btn)
             btn.clicked.connect(slot)
-
-        self.restaurant = restaurant.Restaurant()
+        
 
     def show_menu(self):
-        # Remove all widgets from the central widget
+
         container = self.centralWidget()
         for i in reversed(range(container.layout().count())):
             item = container.layout().itemAt(i)
@@ -69,7 +65,6 @@ class MainWindow(QMainWindow):
             else:
                 container.layout().removeItem(item)
 
-        # Load menu items from Restaurant class
         menu_items = self.restaurant.view_all()
         if not menu_items:
             menu_items = []
@@ -86,10 +81,85 @@ class MainWindow(QMainWindow):
             table.setItem(row, 3, QTableWidgetItem(str(item.price)))
             table.setItem(row, 4, QTableWidgetItem("Yes" if item.in_stock else "No"))
         
+        # Add sorting functionality for ID, Name, and Price
+        if not hasattr(self, 'sort_orders'):
+            self.sort_orders = {
+                'id': 'asc',
+                'name': 'asc', 
+                'price': 'asc'
+            }
+        
+        def update_table_with_items(items):
+            """Helper function to update table with given items"""
+            table.setRowCount(len(items))
+            for row, item in enumerate(items):
+                table.setItem(row, 0, QTableWidgetItem(str(item.id)))
+                table.setItem(row, 1, QTableWidgetItem(str(item.name)))
+                table.setItem(row, 2, QTableWidgetItem(str(item.category)))
+                table.setItem(row, 3, QTableWidgetItem(str(item.price)))
+                table.setItem(row, 4, QTableWidgetItem("Yes" if item.in_stock else "No"))
+        
+        def on_id_header_clicked():
+            # Toggle ID sort order
+            self.sort_orders['id'] = "desc" if self.sort_orders['id'] == "asc" else "asc"
+            
+            # Sort items by ID
+            all_items = self.restaurant.view_all()
+            if self.sort_orders['id'] == "asc":
+                sorted_items = sorted(all_items, key=lambda x: x.id)
+            else:
+                sorted_items = sorted(all_items, key=lambda x: x.id, reverse=True)
+            
+            update_table_with_items(sorted_items)
+        
+        def on_name_header_clicked():
+            # Toggle name sort order
+            self.sort_orders['name'] = "desc" if self.sort_orders['name'] == "asc" else "asc"
+            
+            # Sort items by name
+            sorted_items = self.restaurant.sort_by_name(self.sort_orders['name'])
+            update_table_with_items(sorted_items)
+        
+        def on_price_header_clicked():
+            # Toggle price sort order
+            self.sort_orders['price'] = "desc" if self.sort_orders['price'] == "asc" else "asc"
+            
+            # Sort items by price
+            sorted_items = self.restaurant.sort_by_price(self.sort_orders['price'])
+            update_table_with_items(sorted_items)
+        
+        # Connect header clicks to sorting functions
+        table.horizontalHeader().sectionClicked.connect(
+            lambda section: (
+                on_id_header_clicked() if section == 0 else
+                on_name_header_clicked() if section == 1 else
+                on_price_header_clicked() if section == 3 else
+                None
+            )
+        )
+        
         container.layout().addWidget(table)
+        
+        back_btn = QPushButton("Back to Main Menu")
+        back_btn.setFixedSize(160, 40)
+        container = self.centralWidget()
+        container.layout().addWidget(back_btn)
+
+        def go_back():
+            
+            for i in reversed(range(container.layout().count())):
+                item = container.layout().itemAt(i)
+                widget = item.widget()
+                if widget:
+                    widget.setParent(None)
+                else:
+                    container.layout().removeItem(item)
+            
+            self.init_ui()
+
+        back_btn.clicked.connect(go_back)
 
     def find_item(self):
-        # Prompt for search type
         search_type, ok = QInputDialog.getItem(self, "Find Item", "Search by:", ["ID", "Name", "Category"], 0, False)
         if not ok:
             return
@@ -100,7 +170,6 @@ class MainWindow(QMainWindow):
         result = None
         try:
             if search_type == "ID":
-                # Convert string to int for ID search
                 item_id = int(value)
                 result = self.restaurant.find_by_id(item_id)
             elif search_type == "Name":
@@ -111,7 +180,6 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Error", "Invalid ID format. Please enter a number.")
             return
         
-        # Display result
         if not result:
             QMessageBox.information(self, "Result", "No item found.")
         elif isinstance(result, list):
@@ -124,7 +192,7 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Result", f"Found item:\nID: {result.id}\nName: {result.name}\nCategory: {result.category}\nPrice: ${result.price}\nIn Stock: {'Yes' if result.in_stock else 'No'}")
 
     def add_item(self):
-        # Prompt for new item details
+
         item_id, ok_id = QInputDialog.getText(self, "Add Item", "Enter new item ID:")
         if not ok_id or not item_id:
             return
@@ -137,17 +205,19 @@ class MainWindow(QMainWindow):
         price, ok_price = QInputDialog.getText(self, "Add Item", "Enter item price:")
         if not ok_price or not price:
             return
-        
-        # Add to restaurant
+
+
+
         try:
-            from menu_item import MenuItem
-            new_item = MenuItem(id=int(item_id), name=name, price=float(price), category=category)
+            new_item = MenuItem(id=utils.validate_unique_id(self.restaurant.menu_items, int(item_id)), name=utils.normalize(name), price=utils.validate_price(price), category=utils.normalize(category))
             self.restaurant.add_item(new_item)
             QMessageBox.information(self, "Success", f"Added item: {name} in category {category} for ${price}")
         except ValueError as e:
             QMessageBox.warning(self, "Error", f"Invalid input format: {e}")
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Failed to add item: {e}")
+
+
     def delete_item(self):
         item_id, ok = QInputDialog.getText(self, "Delete Item", "Enter item ID to delete:")
         if not ok or not item_id:
@@ -159,6 +229,7 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Error", "Invalid ID format. Please enter a number.")
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Failed to delete item: {e}")
+
     def update_item(self):
         item_id, ok_id = QInputDialog.getText(self, "Update Item", "Enter item ID to update:")
         if not ok_id or not item_id:
@@ -166,241 +237,22 @@ class MainWindow(QMainWindow):
         new_name, ok_name = QInputDialog.getText(self, "Update Item", "Enter new name (leave blank to keep current):")
         new_category, ok_cat = QInputDialog.getText(self, "Update Item", "Enter new category (leave blank to keep current):")
         new_price, ok_price = QInputDialog.getText(self, "Update Item", "Enter new price (leave blank to keep current):")
+
         try:
             price_value = float(new_price) if new_price else None
-            self.restaurant.update_item(int(item_id), name=new_name if new_name else None, category=new_category if new_category else None, price=price_value)
+            self.restaurant.update_item(int(item_id), name=utils.normalize(new_name) if new_name else None, category=utils.normalize(new_category) if new_category else None, price=price_value)
             QMessageBox.information(self, "Success", f"Updated item with ID: {item_id}")
-        except ValueError:
-            QMessageBox.warning(self, "Error", "Invalid ID or price format. Please enter numbers.")
+        except ValueError as e:
+            QMessageBox.warning(self, "Error", f"Invalid input format: {e}")
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Failed to update item: {e}")
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
 
-def cli_main_menu():
-    """Main CLI menu loop."""
-    print("Welcome to the Restaurant Menu CLI!")
-    data = utils.load_json()
-    if not data:
-        print("Failed to load restaurant data. Exiting.")
-        return
-
-    # Instantiate Restaurant class (assumes Restaurant can be initialized with data)
-    try:
-        rest = restaurant.Restaurant()
-        # If Restaurant class needs to load data, you may need to call a method here
-    except Exception as e:
-        print(f"Error initializing Restaurant: {e}")
-        return
-
-    while True:
-        print("\n--- Main Menu ---")
-        print("1. View All Menu Items")
-        print("2. Search Menu Items")
-        print("3. Add Menu Item")
-        print("4. Update Menu Item")
-        print("5. Delete Menu Item")
-        print("6. Save Changes")
-        print("7. Sort Menu Items")
-        print("8. Export Menu")
-        print("9. Show Statistics")
-        print("0. Quit")
-        choice = input("Select an option: ").strip()
-
-        if choice == "1":
-            # View all items
-            items = rest.view_all()
-            if items:
-                print(utils.format_items_table(items))
-            else:
-                print("No menu items found.")
-        elif choice == "2":
-            print("Search by: 1) ID  2) Name  3) Category")
-            sub = input("Choose search type: ").strip()
-            if sub == "1":
-                id_str = input("Enter item ID: ").strip()
-                try:
-                    item = rest.find_by_id(int(id_str))
-                    if item:
-                        print(utils.format_items_table([item]))
-                    else:
-                        print("Item not found.")
-                except Exception as e:
-                    print(f"Error: {e}")
-            elif sub == "2":
-                name = input("Enter item name (partial allowed): ").strip()
-                items = rest.find_by_name(name)
-                if items:
-                    print(utils.format_items_table(items))
-                else:
-                    print("No items found.")
-            elif sub == "3":
-                cat = input("Enter category (partial allowed): ").strip()
-                items = rest.find_by_category(cat)
-                if items:
-                    print(utils.format_items_table(items))
-                else:
-                    print("No items found.")
-            else:
-                print("Invalid search type.")
-        elif choice == "3":
-            # Add item
-            try:
-                name = input("Enter name: ").strip()
-                price = input("Enter price: ").strip()
-                category = input("Enter category: ").strip()
-                in_stock = input("In stock? (y/n): ").strip().lower() == "y"
-                # You may need to generate a unique ID here
-                # This is a placeholder; actual implementation may differ
-                new_id = int(time.time())
-                item = menu_item.MenuItem(
-                    id=new_id,
-                    name=utils.validate_non_empty_string(name, "Name"),
-                    price=utils.validate_price(price),
-                    category=category,
-                    in_stock=in_stock
-                )
-                # Add to restaurant
-                rest.add_item(item)
-                print("Item added successfully.")
-            except Exception as e:
-                print(f"Failed to add item: {e}")
-        elif choice == "4":
-            # Update item
-            try:
-                id_str = input("Enter ID of item to update: ").strip()
-                item = rest.find_by_id(int(id_str))
-                if not item:
-                    print("Item not found.")
-                    continue
-                print("Leave field blank to keep current value.")
-                name = input(f"New name [{item.name}]: ").strip() or item.name
-                price = input(f"New price [{item.price}]: ").strip() or item.price
-                in_stock = input(f"In stock? (y/n) [{item.in_stock}]: ").strip()
-                if in_stock == "":
-                    in_stock = item.in_stock
-                else:
-                    in_stock = in_stock.lower() == "y"
-                # Update item
-                rest.update_item(
-                    item_id=int(id_str),
-                    name=name,
-                    price=price,
-                    in_stock=in_stock
-                )
-                print("Item updated successfully.")
-            except Exception as e:
-                print(f"Failed to update item: {e}")
-        elif choice == "5":
-            # Delete item
-            try:
-                id_str = input("Enter ID of item to delete: ").strip()
-                rest.delete_item(int(id_str))
-                print("Item deleted successfully.")
-            except Exception as e:
-                print(f"Failed to delete item: {e}")
-        elif choice == "6":
-            # Save changes
-            # You may need to get data from Restaurant instance
-            try:
-                # This assumes Restaurant has a method to get current data
-                data = rest.get_data()
-                utils.save_json(path,data)
-            except Exception as e:
-                print(f"Failed to save: {e}")
-        elif choice == "7":
-            print("Sort by: 1) Name  2) Price  3) Availability")
-            sub = input("Choose sort type: ").strip()
-            if sub == "1":
-                order = input("Order (asc/desc): ").strip().lower()
-                items = rest.sort_by_name(order)
-                print(utils.format_items_table(items))
-            elif sub == "2":
-                order = input("Order (asc/desc): ").strip().lower()
-                items = rest.sort_by_price(order)
-                print(utils.format_items_table(items))
-            elif sub == "3":
-                avail = input("Available first? (y/n): ").strip().lower() == "y"
-                items = rest.sort_by_availability(avail)
-                print(utils.format_items_table(items))
-            else:
-                print("Invalid sort type.")
-        elif choice == "8":
-            print("Export to: 1) CSV  2) TXT")
-            sub = input("Choose export type: ").strip()
-            path = input("Enter output file path: ").strip()
-            fields = input("Enter fields to export (comma separated): ").strip().split(",")
-            items = rest.view_all()
-            if sub == "1":
-                utils.export_to_csv(items, fields, path)
-            elif sub == "2":
-                # Placeholder for TXT export
-                print("TXT export not implemented.")
-            else:
-                print("Invalid export type.")
-        elif choice == "9":
-            # Show statistics (placeholder)
-            print("Statistics feature not implemented.")
-        elif choice == "0":
-            confirm = input("Save changes before quitting? (y/n): ").strip().lower()
-            if confirm == "y":
-                try:
-                    data = rest.get_data()
-                    utils.save_json(path,data)
-                except Exception as e:
-                    print(f"Failed to save: {e}")
-            print("Goodbye!")
-            break
-        else:
-            print("Invalid selection. Please try again.")
-
-# TODO: Build Main Menu loop (robust, user-friendly):
-# - Options: View, Search, Add, Update, Delete, Save, Sort, Export, Statistics, Undo, Quit
-# - Validate input; re-prompt gracefully for invalid menu selections
-# - Keep the UI consistent and clear
-def main():
-    while True:
-        print("1. Boot on CLI")
-        print("0. Exit")
-        choice = input("Select Boot Option: ").strip()
-        if choice == "1":
-            cli_main_menu()
-        elif choice == "0":
-            print("Exiting the application...")
-            break
-        else:
-            print("Invalid Selection")
 
 
-
-# TODO: Add `if __name__ == "__main__":` guard and call `main()` once implemente
-
-
-
-# - Search submenu: by ID, by Name (supports partial), by Category (supports partial)
-# - View submenu: View All, View by Category, View by Price Range
-# - Update submenu for a selected item: update name, category, price, availability
-# - Sort submenu: b   y Name (A–Z, Z–A), by Price (low→high, high→low), by Availability
-# - Sort submenu: by Name (A–Z, Z–A), by Price (low→high, high→low), by Availability
-
-
-# TODO: Integrate idnput validation helpers from `utils.py`:
-# - Ensure unique IDs when adding new items
-# - Validate numeric fields (price >= 0 etc.)
-# - Validate non-empty strings for name/category
-# - Gracefully handle not-found cases with warnings
-
-
-# TODO: Formatting and UX helpers:
-# - Use table formatting (from utils) for listing items
-# - Show clear success/error messages
-
-
-
-# TODO: Optional enhancements:
-# - Action logging (add/update/delete) to a log file
-# - Show simple statistics (e.g., average price by category)
 
