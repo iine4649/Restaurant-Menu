@@ -2,6 +2,17 @@ import json
 import os
 import csv
 import tempfile
+import sys
+
+def get_resource_path(relative_path):
+    """Get absolute path to resource, works for dev and for PyInstaller"""
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    
+    return os.path.join(base_path, relative_path)
 
 
 
@@ -70,9 +81,10 @@ def format_items_table(items):
 
 
 # Load data from json file
-def load_json(path):
+def load_json(relative_path):
     """Load saved user data"""
     try:
+        path = get_resource_path(relative_path)
         if os.path.exists(path):
             with open(path, 'r', encoding='utf-8') as f:
                 return json.load(f)
@@ -81,14 +93,32 @@ def load_json(path):
         return {}
         
 # Save data to json file
-def save_json(path, data):
-        dir_name = os.path.dirname(path) or "."
+def save_json(relative_path, data):
+    """Save data to JSON file, handling both dev and PyInstaller environments"""
+    try:
+        # For PyInstaller, save to the same directory as the executable
+        if hasattr(sys, '_MEIPASS'):
+            # Running as PyInstaller bundle
+            exe_dir = os.path.dirname(sys.executable)
+            path = os.path.join(exe_dir, relative_path)
+        else:
+            # Running as script
+            path = get_resource_path(relative_path)
+        
+        # Ensure directory exists
+        dir_name = os.path.dirname(path)
+        if dir_name and not os.path.exists(dir_name):
+            os.makedirs(dir_name, exist_ok=True)
+        
         with tempfile.NamedTemporaryFile("w", dir=dir_name, delete=False, encoding="utf-8") as tmpfile:
             json.dump(data, tmpfile, ensure_ascii=False, indent=2)
             tmpfile.flush()
             os.fsync(tmpfile.fileno())
             tempname = tmpfile.name
         os.replace(tempname, path)
+        print(f"Data saved to: {path}")
+    except Exception as e:
+        print(f"Error saving data: {e}")
 
 
 
