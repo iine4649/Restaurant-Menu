@@ -3,8 +3,9 @@ import os
 import csv
 import tempfile
 
-path = "restaurant_data.json"
 
+
+# Validate unique id
 def validate_unique_id(existing_items, new_id):
     try:
         # Extract IDs from menu items
@@ -15,12 +16,13 @@ def validate_unique_id(existing_items, new_id):
         raise ValueError("Please enter ID in number")
     return new_id
 
+# Validate non empty string
 def validate_non_empty_string(value, field_name) -> str:
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{field_name} cannot be empty")
     return value.strip()
 
-
+# Validate price
 
 def validate_price(value) -> float:
     try:
@@ -32,7 +34,7 @@ def validate_price(value) -> float:
     return price
 
 
-
+# Format items table
 def format_items_table(items):
     if not items:
         return "Data does not exist"
@@ -67,6 +69,7 @@ def format_items_table(items):
 
 
 
+# Load data from json file
 def load_json(path):
     """Load saved user data"""
     try:
@@ -77,7 +80,7 @@ def load_json(path):
         print(f"Data loading error: {e}")
         return {}
         
-
+# Save data to json file
 def save_json(path, data):
         dir_name = os.path.dirname(path) or "."
         with tempfile.NamedTemporaryFile("w", dir=dir_name, delete=False, encoding="utf-8") as tmpfile:
@@ -90,7 +93,7 @@ def save_json(path, data):
 
 
 
-
+#TODO: export to csv use in main.py
 def export_to_csv(items, fields, path):
     try:
         with open(path, 'w', newline='', encoding='utf-8') as csvfile:
@@ -108,7 +111,7 @@ def export_to_csv(items, fields, path):
     except Exception as e:
         print(f"Failed to export CSV file: {e}")
 
-
+#TODO: export to txt use in main.py
 def export_to_txt(items,fields,path):
     try:
         with open(path, 'w', newline='',encoding='utf-8') as txt:
@@ -127,11 +130,11 @@ def export_to_txt(items,fields,path):
         print(f"Failed to export txt file: {e}")
 
 
-
+#TODO: normalize use in main.py
 def normalize(text) -> str:
     return text.title()
 
-
+#TODO: add log to a file
 def append_action_log(path, action, before, after, timestamp):
     try:
         with open(path, "a", encoding="utf-8") as f:

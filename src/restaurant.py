@@ -11,8 +11,10 @@ class Restaurant:
         self.menu_items = []
         self.load_data()
     
+
+    #load data from json file
     def load_data(self):
-        """Load menu items from JSON file"""
+
         try:
             import utils
             data = utils.load_json("data/restaurant_data.json")
@@ -34,8 +36,8 @@ class Restaurant:
             print(f"Error loading data: {e}")
             self.menu_items = []
     
+    #save data to json file
     def save_data(self):
-        """Save menu items to JSON file"""
         try:
             import utils
             data = self.get_data()
